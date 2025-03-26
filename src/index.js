@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from "express";
 
 const app = express();
@@ -21,14 +22,19 @@ app.use(
  * Requests that handle stock levels.
  */
 import stockRouter from "./routers/stock_router.js";
-
 app.use(stockRouter);
+
+/**
+ * Requests that handle stock levels.
+ */
+import salesRouter from "./routers/sales_router.js";
+app.use("/sales", salesRouter);
 
 /**
  * Sets the port for the application to listen for requests that have to be handled.
  * This is the entire application's server event listener.
  * (Event meaning api calls through exposed routes).
  */
-app.listen(3300, () => {
-    console.log("application running on port: 3300");
+app.listen(process.env.APPLICATION_SERVER_PORT, () => {
+    console.log(`application running on port: ${ process.env.APPLICATION_SERVER_PORT }`);
 });
