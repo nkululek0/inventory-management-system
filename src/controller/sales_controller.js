@@ -11,18 +11,17 @@ const salesController = {
                 res.json(data);
             }
             else {
-                message = "There was an issue while attempting to retrieve sales records, please try again";
-                throw new Error(message);
+                errorMessage = "There was an issue while attempting to retrieve sales records, please try again";
+                throw new Error(errorMessage);
             }
         }
         catch (error) {
-            console.log(error);
-
-            res.json({
+            res.status(502).json({
                 error: {
-                    message: errorMessage
+                    message: error.message
                 }
             });
+            console.log(error);
         }
     }
 };

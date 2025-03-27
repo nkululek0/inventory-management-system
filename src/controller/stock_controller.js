@@ -1,40 +1,65 @@
-import stock from "../models/stock.js";
+import stockModel from "../models/stock_model.js";
 
 const stockController = {
     getStock (req, res) {
+        let errorMessage = "Failed to establish connection to fetch stock information, please try again";
+        
         try {
-            const products = stock.products;
+            const products = stockModel.getStock();
             
-            res.json(products);
+            if (typeof products == "object" && Object.entries(products).length > 0) {
+                res.json(products);
+            }
+            else {
+                errorMessage = "There was an issue while trying to process stock information, please try again";
+                throw new Error(errorMessage);
+            }
         }
         catch (error) {
+            res.status(502).json({
+                error: {
+                    message: error.message
+                }
+            });
             console.log(error);
         }
     },
 
     addProduct (req, res) {
+        let errorMessage = "Failed to establish connection in order to add product, please try again";
         const product = req.body;
         let { ProductID, ProductName, ProductSku, ProductStockLevel, ProductPricing, ProductSupplier } = product;
         ProductStockLevel = Number(ProductStockLevel);
         ProductPricing = Number(ProductPricing);
+        
+        const newProduct = {
+            ProductID: ProductID,
+            ProductName: ProductName,
+            ProductSku: ProductSku,
+            ProductStockLevel: ProductStockLevel,
+            ProductPricing: ProductPricing,
+            ProductSupplier: ProductSupplier
+        };
 
         try {
-            const newProduct = {
-                ProductID: ProductID,
-                ProductName: ProductName,
-                ProductSku: ProductSku,
-                ProductStockLevel: ProductStockLevel,
-                ProductPricing: ProductPricing,
-                ProductSupplier: ProductSupplier
+            const addedProduct = stockModel.addProduct(newProduct);
+
+            if (addedProduct) {
+                res.json({
+                    "message": `Product ${ ProductName } added successfully`
+                });
             }
-
-            stock.products.push(newProduct);
-
-            res.json({
-                "message": `Product ${ ProductName } added successfully`
-            });
+            else {
+                errorMessage = "Could not add product to database, please ensure that correct data is used before trying again";
+                throw new Error(errorMessage);
+            }
         }
         catch (error) {
+            res.status(502).json({
+                error: {
+                    message: error.message
+                }
+            });
             console.log(error);    
         }
     },
@@ -42,43 +67,55 @@ const stockController = {
     updateProductStockLevel (req, res) {
         const productID = Number(req.params.productID);
         const updatedProductStockLevel = Number(req.params.productStockLevel);
-        let message = "Product stock level was not updated";
+        let errorMessage = "Product stock level was not updated";
 
         try {
-            for (let product of stock.products) {
-                if (product.ProductID == productID) {
-                    product.ProductStockLevel = updatedProductStockLevel;
-                    message = "Successfully updated product stock level";
-                    break;
-                }
-            }
+            const updatedProduct = stockModel.updateProductStockLevel(productID, updatedProductStockLevel);
 
-            res.json({
-                "message": message
-            });
+            if (updatedProduct) {
+                res.json({
+                    "message": "Successfully updated product stock level"
+                });
+            }
+            else {
+                errorMessage = "There was an issue while trying to update the stock level, please check your data and try again";
+                throw new Error(errorMessage);
+            }
         }
         catch (error) {
+            res.status(502).json({
+                "error": {
+                    "message": error.message
+                }
+            });
             console.log(error);    
         }
     },
 
     deleteProduct (req, res) {
         const productID = Number(req.params.productID);
-        let message = "Could not delete product";
+        let errorMessage = "Could not delete product";
 
         try {
-            let productIndex = stock.products.findIndex((product) => product.ProductID == productID);
+            let successfullyDeletedProduct = stockModel.deleteProduct(productID);
 
-            if (productIndex != -1) {
-                stock.products.splice(productIndex, 1);
-                message = "Product successfully deleted";
+            if (successfullyDeletedProduct) {
+                res.json({
+                    message: "Successfully deleted product"
+                });
+            }
+            else {
+                errorMessage = "There was an issue while attempting to delete the product, please try again";
+                throw new Error(errorMessage);
             }
 
-            res.json({
-                "message": message
-            });
         }
         catch (error) {
+            res.json({
+                "error": {
+                    "message": error.message
+                }
+            });
             console.log(error);    
         }
     }
