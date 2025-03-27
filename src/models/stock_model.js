@@ -9,6 +9,21 @@ const stockModel = {
         return data;
     },
 
+    getProduct (productID) {
+        let result = -1;
+        let product = data.products.filter((value) => {
+            if (value.ProductID == productID) {
+                return value;
+            }
+        });
+
+        if (product.length > 0) {
+            result = product[0];
+        }
+        
+        return result;
+    },
+
     addProduct (product) {
         let addedProductedSuccessfully = false;
         

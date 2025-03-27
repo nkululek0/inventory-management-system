@@ -22,13 +22,19 @@ app.use(
  * Requests that handle stock levels.
  */
 import stockRouter from "./routers/stock_router.js";
-app.use(stockRouter);
+app.use("/dashboard", stockRouter);
 
 /**
  * Requests that handle stock levels.
  */
 import salesRouter from "./routers/sales_router.js";
 app.use("/sales", salesRouter);
+
+/**
+ * Requests that handle restock notification.
+ */
+import restockNotificationRouter from "./routers/restock_notification_router.js";
+app.use("/restock-notification", restockNotificationRouter);
 
 /**
  * Sets the port for the application to listen for requests that have to be handled.
