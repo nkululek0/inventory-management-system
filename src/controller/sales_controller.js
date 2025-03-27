@@ -1,20 +1,26 @@
-import salesRecord from "../models/sales_record.js";
+import salesRecordModel from "../models/sales_record.js";
 
 const salesController = {
     getSales (req, res) {
-        let message = "Failed to fetch records, please try again";
+        let errorMessage = "Failed to fetch records, please try again";
 
         try {
-            res.json({
-                message: salesRecord
-            });
+            let data = salesRecordModel.getSales();
+
+            if (typeof data == "object" && Object.entries(data).length > 0) {
+                res.json(data);
+            }
+            else {
+                message = "There was an issue while attempting to retrieve sales records, please try again";
+                throw new Error(message);
+            }
         }
         catch (error) {
             console.log(error);
 
             res.json({
                 error: {
-                    message: message
+                    message: errorMessage
                 }
             });
         }
